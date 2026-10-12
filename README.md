@@ -143,7 +143,8 @@ Edit `config/scoring.yaml` to tune:
 - Red flag penalties
 - Bonus adjustments for box, invoice, warranty
 
-See `docs/tuning_guide.md` for details.
+See [docs/tuning_guide.md](docs/tuning_guide.md) for detailed tuning instructions.
+See [docs/architecture.md](docs/architecture.md) for system design and data flow.
 
 ## Limitations
 
