@@ -38,8 +38,7 @@ class PriceCache:
                     source TEXT NOT NULL,
                     comparable_count INTEGER DEFAULT 1,
                     timestamp DATETIME NOT NULL,
-                    notes TEXT,
-                    UNIQUE(product_key, source)
+                    notes TEXT
                 )
                 """
             )
@@ -133,7 +132,7 @@ class PriceCache:
         comparable_count: int = 1,
         notes: Optional[str] = None,
     ):
-        """Store or update price data.
+        """Store price data.
 
         Args:
             category: Product category
@@ -141,9 +140,13 @@ class PriceCache:
             model: Model name
             variant: Variant
             price: Price in VND
-            source: Price source
+            source: Price source (retail, comparables, depreciation)
             comparable_count: Number of comparables (for median calculations)
             notes: Optional notes
+        
+        Note:
+            For 'comparables' source, this inserts a new entry each time.
+            For other sources, use get() to check if entry exists before adding.
         """
         product_key = self._make_product_key(category, brand, model, variant)
         timestamp = datetime.now().isoformat()
@@ -151,7 +154,7 @@ class PriceCache:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO prices 
+                INSERT INTO prices 
                 (product_key, category, brand, model, variant, price, source, 
                  comparable_count, timestamp, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
