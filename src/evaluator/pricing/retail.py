@@ -1,6 +1,5 @@
 """Retail price provider with hardcoded smartphone prices."""
 
-from typing import Optional
 
 from ..models import ConfidenceLevel, PriceReference, PriceSource, ProductInfo
 from .interface import PriceProvider
@@ -79,7 +78,7 @@ class RetailProvider(PriceProvider):
         """Retail has medium priority (after comparables)."""
         return 50
 
-    def get_reference_price(self, product: ProductInfo) -> Optional[PriceReference]:
+    def get_reference_price(self, product: ProductInfo) -> PriceReference | None:
         """Get retail price for a product.
 
         Args:
@@ -121,7 +120,7 @@ class RetailProvider(PriceProvider):
 
         return None
 
-    def _extract_storage_variant(self, variant: Optional[str]) -> str:
+    def _extract_storage_variant(self, variant: str | None) -> str:
         """Extract storage size from variant string.
 
         Args:

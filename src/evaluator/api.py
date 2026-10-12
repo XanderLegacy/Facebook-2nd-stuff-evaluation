@@ -3,11 +3,10 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .cli import evaluate_post
@@ -54,7 +53,7 @@ async def health():
 async def evaluate(
     caption: str = Form(..., description="Post caption text"),
     images: list[UploadFile] = File(..., description="1-8 images of the item"),
-    manual_price: Optional[int] = Form(None, description="Manual price override in VND"),
+    manual_price: int | None = Form(None, description="Manual price override in VND"),
 ):
     """Evaluate a second-hand post.
 
@@ -112,9 +111,9 @@ async def seed_cache(
     category: str = Form(...),
     brand: str = Form(...),
     model: str = Form(...),
-    variant: Optional[str] = Form(None),
+    variant: str | None = Form(None),
     price: int = Form(...),
-    notes: Optional[str] = Form(None),
+    notes: str | None = Form(None),
 ):
     """Manually add a comparable price to the cache.
 

@@ -5,9 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from evaluator.extraction import Extractor, ExtractionError
+from evaluator.extraction import ExtractionError, Extractor
 from evaluator.models import ExtractionInput
-
 
 # Mock API responses
 MOCK_GOOD_LISTING_RESPONSE = {

@@ -1,12 +1,11 @@
 """Pydantic models for the evaluator."""
 
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Confidence level for assessments."""
 
     LOW = "low"
@@ -14,7 +13,7 @@ class ConfidenceLevel(str, Enum):
     HIGH = "high"
 
 
-class PriceSource(str, Enum):
+class PriceSource(StrEnum):
     """Source of reference price."""
 
     RETAIL = "retail"
@@ -28,25 +27,25 @@ class ExtractionInput(BaseModel):
 
     caption: str = Field(..., description="Post caption text")
     image_paths: list[str] = Field(..., description="Paths to uploaded images")
-    manual_price: Optional[int] = Field(None, description="Manual price override in VND")
+    manual_price: int | None = Field(None, description="Manual price override in VND")
 
 
 class ProductInfo(BaseModel):
     """Extracted product information."""
 
-    product_name: Optional[str] = Field(None, description="Full product name")
-    brand: Optional[str] = Field(None, description="Brand name")
-    model: Optional[str] = Field(None, description="Model name")
-    variant: Optional[str] = Field(None, description="Storage/size/color variant")
-    category: Optional[str] = Field(None, description="Product category (smartphone, laptop, etc)")
-    asking_price: Optional[int] = Field(None, description="Asking price in VND")
+    product_name: str | None = Field(None, description="Full product name")
+    brand: str | None = Field(None, description="Brand name")
+    model: str | None = Field(None, description="Model name")
+    variant: str | None = Field(None, description="Storage/size/color variant")
+    category: str | None = Field(None, description="Product category (smartphone, laptop, etc)")
+    asking_price: int | None = Field(None, description="Asking price in VND")
     currency: str = Field("VND", description="Currency code")
-    age_of_item: Optional[str] = Field(None, description="Age or purchase date")
-    reason_for_selling: Optional[str] = Field(None, description="Stated reason for selling")
-    warranty: Optional[str] = Field(None, description="Warranty information")
-    accessories_included: Optional[list[str]] = Field(None, description="List of accessories")
-    has_box: Optional[bool] = Field(None, description="Original box included")
-    has_invoice: Optional[bool] = Field(None, description="Invoice/receipt included")
+    age_of_item: str | None = Field(None, description="Age or purchase date")
+    reason_for_selling: str | None = Field(None, description="Stated reason for selling")
+    warranty: str | None = Field(None, description="Warranty information")
+    accessories_included: list[str] | None = Field(None, description="List of accessories")
+    has_box: bool | None = Field(None, description="Original box included")
+    has_invoice: bool | None = Field(None, description="Invoice/receipt included")
     extraction_confidence: ConfidenceLevel = Field(
         ConfidenceLevel.MEDIUM, description="Overall extraction confidence"
     )
@@ -68,7 +67,7 @@ class ConditionAssessment(BaseModel):
     image_caption_mismatch: bool = Field(
         False, description="Photos don't match caption description"
     )
-    mismatch_explanation: Optional[str] = Field(
+    mismatch_explanation: str | None = Field(
         None, description="Explanation of mismatch if detected"
     )
     assessment_confidence: ConfidenceLevel = Field(
@@ -92,12 +91,12 @@ class PriceReference(BaseModel):
     """Reference price information."""
 
     source: PriceSource = Field(..., description="Source of reference price")
-    value: Optional[int] = Field(None, description="Reference price in VND")
+    value: int | None = Field(None, description="Reference price in VND")
     comparable_count: int = Field(0, description="Number of comparables used")
     confidence: ConfidenceLevel = Field(
         ConfidenceLevel.MEDIUM, description="Confidence in reference price"
     )
-    notes: Optional[str] = Field(None, description="Additional notes about pricing")
+    notes: str | None = Field(None, description="Additional notes about pricing")
 
 
 class FairPriceRange(BaseModel):
@@ -114,8 +113,8 @@ class EvaluationResult(BaseModel):
     """Final evaluation result."""
 
     score: float = Field(..., ge=1, le=10, description="Overall score 1-10")
-    asking_price: Optional[int] = Field(None, description="Asking price in VND")
-    fair_price_range: Optional[FairPriceRange] = Field(None, description="Fair price range")
+    asking_price: int | None = Field(None, description="Asking price in VND")
+    fair_price_range: FairPriceRange | None = Field(None, description="Fair price range")
     product: ProductInfo = Field(..., description="Extracted product information")
     condition: ConditionAssessment = Field(..., description="Condition assessment")
     caption_signals: CaptionSignals = Field(..., description="Caption analysis")

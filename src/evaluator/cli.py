@@ -1,10 +1,8 @@
 """Command-line interface for the evaluator."""
 
 import argparse
-import json
 import sys
 from pathlib import Path
-from typing import Optional
 
 from .extraction import extract_from_post
 from .models import ConfidenceLevel, EvaluationResult
@@ -14,7 +12,7 @@ from .pricing.retail import RetailProvider
 from .scoring import Scorer
 
 
-def format_price(price: Optional[int]) -> str:
+def format_price(price: int | None) -> str:
     """Format price in VND with thousands separators.
 
     Args:
@@ -53,7 +51,7 @@ def print_result(result: EvaluationResult):
         result: Evaluation result to display
     """
     print("\n" + "=" * 70)
-    print_colored(f"EVALUATION RESULT", "bold")
+    print_colored("EVALUATION RESULT", "bold")
     print("=" * 70 + "\n")
 
     # Score
@@ -83,7 +81,7 @@ def print_result(result: EvaluationResult):
 
     if result.fair_price_range:
         fp = result.fair_price_range
-        print(f"  Fair Price Range:")
+        print("  Fair Price Range:")
         print(f"    Low:  {format_price(fp.low)}")
         print(f"    Mid:  {format_price(fp.mid)}")
         print(f"    High: {format_price(fp.high)}")
@@ -99,12 +97,12 @@ def print_result(result: EvaluationResult):
     print(f"  Real Photos: {'Yes' if result.condition.looks_like_real_photos else 'No'}")
 
     if result.condition.positive_observations:
-        print(f"  Positive:")
+        print("  Positive:")
         for obs in result.condition.positive_observations:
             print(f"    ✓ {obs}")
 
     if result.condition.visible_defects:
-        print(f"  Defects:")
+        print("  Defects:")
         for defect in result.condition.visible_defects:
             print(f"    ⚠ {defect}")
     print()
@@ -124,7 +122,7 @@ def print_result(result: EvaluationResult):
 
     # Confidence and warnings
     conf_color = "green" if result.confidence == ConfidenceLevel.HIGH else "yellow"
-    print(f"Confidence: ", end="")
+    print("Confidence: ", end="")
     print_colored(result.confidence.value.upper(), conf_color)
 
     if result.warnings:
@@ -139,7 +137,7 @@ def print_result(result: EvaluationResult):
 
 
 def evaluate_post(
-    caption: str, image_paths: list[str], manual_price: Optional[int] = None
+    caption: str, image_paths: list[str], manual_price: int | None = None
 ) -> EvaluationResult:
     """Evaluate a post and return the result.
 

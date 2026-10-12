@@ -2,7 +2,6 @@
 
 import bisect
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
@@ -19,7 +18,7 @@ from .models import (
 class ScoringConfig:
     """Configuration for scoring rules."""
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Path | None = None):
         """Load scoring configuration from YAML.
 
         Args:
@@ -51,7 +50,7 @@ class ScoringConfig:
         rounded = max(0, min(10, rounded))  # Clamp to 0-10
         return self.config["condition_multipliers"][rounded]
 
-    def get_base_score_from_ratio(self, ratio: float) -> tuple[float, Optional[str]]:
+    def get_base_score_from_ratio(self, ratio: float) -> tuple[float, str | None]:
         """Map price ratio to base score using configured thresholds.
 
         Args:
@@ -101,7 +100,7 @@ class ScoringConfig:
 class Scorer:
     """Scores posts based on price, condition, and signals."""
 
-    def __init__(self, config: Optional[ScoringConfig] = None):
+    def __init__(self, config: ScoringConfig | None = None):
         """Initialize scorer with configuration.
 
         Args:
@@ -161,8 +160,8 @@ class Scorer:
 
     def calculate_score(
         self,
-        asking_price: Optional[int],
-        fair_price_range: Optional[FairPriceRange],
+        asking_price: int | None,
+        fair_price_range: FairPriceRange | None,
         condition: ConditionAssessment,
         signals: CaptionSignals,
         product: ProductInfo,
@@ -237,7 +236,7 @@ class Scorer:
 
     def determine_confidence(
         self,
-        reference_price: Optional[PriceReference],
+        reference_price: PriceReference | None,
         condition: ConditionAssessment,
         signals: CaptionSignals,
     ) -> ConfidenceLevel:
@@ -275,8 +274,8 @@ class Scorer:
     def generate_explanation(
         self,
         score: float,
-        asking_price: Optional[int],
-        fair_price_range: Optional[FairPriceRange],
+        asking_price: int | None,
+        fair_price_range: FairPriceRange | None,
         condition: ConditionAssessment,
         adjustments: dict[str, float],
     ) -> str:

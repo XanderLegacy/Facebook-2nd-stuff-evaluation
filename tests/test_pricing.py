@@ -2,7 +2,6 @@
 
 import sqlite3
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pytest
 
@@ -361,7 +360,7 @@ def test_cache_cleanup(temp_cache):
     with sqlite3.connect(temp_cache.db_path) as conn:
         conn.execute(
             """
-            INSERT INTO prices 
+            INSERT INTO prices
             (product_key, category, brand, model, variant, price, source, timestamp)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,

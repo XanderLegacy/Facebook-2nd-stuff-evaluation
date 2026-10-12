@@ -1,7 +1,6 @@
 """Depreciation-based price provider (fallback)."""
 
 import re
-from typing import Optional
 
 from ..models import ConfidenceLevel, PriceReference, PriceSource, ProductInfo
 from .interface import PriceProvider
@@ -22,7 +21,7 @@ class DepreciationProvider(PriceProvider):
         (48, 999): 0.25,  # 48+ months: 25%
     }
 
-    def __init__(self, retail_provider: Optional[RetailProvider] = None):
+    def __init__(self, retail_provider: RetailProvider | None = None):
         """Initialize depreciation provider.
 
         Args:
@@ -35,7 +34,7 @@ class DepreciationProvider(PriceProvider):
         """Depreciation has lowest priority (fallback)."""
         return 90
 
-    def get_reference_price(self, product: ProductInfo) -> Optional[PriceReference]:
+    def get_reference_price(self, product: ProductInfo) -> PriceReference | None:
         """Get depreciation-based price estimate.
 
         Args:
@@ -69,7 +68,7 @@ class DepreciationProvider(PriceProvider):
             notes=f"Estimated from retail price with {age_months}-month depreciation ({depreciation_factor:.0%})",
         )
 
-    def _extract_age_months(self, age_of_item: Optional[str]) -> Optional[int]:
+    def _extract_age_months(self, age_of_item: str | None) -> int | None:
         """Extract age in months from text.
 
         Args:

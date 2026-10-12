@@ -1,7 +1,6 @@
 """Comparable price provider using cached market data."""
 
 import statistics
-from typing import Optional
 
 from ..models import ConfidenceLevel, PriceReference, PriceSource, ProductInfo
 from .cache import PriceCache
@@ -11,7 +10,7 @@ from .interface import PriceProvider
 class ComparableProvider(PriceProvider):
     """Provides reference prices from comparable listings."""
 
-    def __init__(self, cache: Optional[PriceCache] = None, min_comparables: int = 3):
+    def __init__(self, cache: PriceCache | None = None, min_comparables: int = 3):
         """Initialize comparable provider.
 
         Args:
@@ -26,7 +25,7 @@ class ComparableProvider(PriceProvider):
         """Comparables have highest priority."""
         return 10
 
-    def get_reference_price(self, product: ProductInfo) -> Optional[PriceReference]:
+    def get_reference_price(self, product: ProductInfo) -> PriceReference | None:
         """Get reference price from comparable listings.
 
         Args:
@@ -71,9 +70,9 @@ class ComparableProvider(PriceProvider):
         category: str,
         brand: str,
         model: str,
-        variant: Optional[str],
+        variant: str | None,
         price: int,
-        notes: Optional[str] = None,
+        notes: str | None = None,
     ):
         """Add a comparable price to the cache.
 

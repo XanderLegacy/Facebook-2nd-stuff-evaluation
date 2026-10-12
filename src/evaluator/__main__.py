@@ -5,6 +5,7 @@ import sys
 if len(sys.argv) > 1 and sys.argv[1] in ("api", "serve", "server"):
     # Run API server
     import os
+
     import uvicorn
 
     sys.argv.pop(1)  # Remove the api/serve argument

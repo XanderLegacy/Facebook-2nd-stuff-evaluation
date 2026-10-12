@@ -5,7 +5,6 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Optional
 
 import anthropic
 from pydantic import ValidationError
@@ -13,7 +12,6 @@ from pydantic import ValidationError
 from .models import (
     CaptionSignals,
     ConditionAssessment,
-    ConfidenceLevel,
     ExtractionInput,
     ProductInfo,
 )
@@ -28,7 +26,7 @@ class ExtractionError(Exception):
 class Extractor:
     """Extracts structured data from post caption and images using Claude."""
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         """Initialize extractor with Anthropic API.
 
         Args:
@@ -184,9 +182,9 @@ class Extractor:
 def extract_from_post(
     caption: str,
     image_paths: list[str],
-    manual_price: Optional[int] = None,
-    api_key: Optional[str] = None,
-    model: Optional[str] = None,
+    manual_price: int | None = None,
+    api_key: str | None = None,
+    model: str | None = None,
 ) -> tuple[ProductInfo, ConditionAssessment, CaptionSignals]:
     """Convenience function to extract data from a post.
 

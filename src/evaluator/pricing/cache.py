@@ -4,13 +4,12 @@ import os
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 
 class PriceCache:
     """SQLite-based cache for price data."""
 
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: str | None = None):
         """Initialize price cache.
 
         Args:
@@ -44,20 +43,20 @@ class PriceCache:
             )
             conn.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_product_key 
+                CREATE INDEX IF NOT EXISTS idx_product_key
                 ON prices(product_key)
                 """
             )
             conn.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_category 
+                CREATE INDEX IF NOT EXISTS idx_category
                 ON prices(category, brand, model)
                 """
             )
             conn.commit()
 
     def _make_product_key(
-        self, category: str, brand: Optional[str], model: Optional[str], variant: Optional[str]
+        self, category: str, brand: str | None, model: str | None, variant: str | None
     ) -> str:
         """Create a normalized product key.
 
@@ -82,12 +81,12 @@ class PriceCache:
     def get(
         self,
         category: str,
-        brand: Optional[str],
-        model: Optional[str],
-        variant: Optional[str],
+        brand: str | None,
+        model: str | None,
+        variant: str | None,
         source: str,
         ttl_days: int = 7,
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Get cached price data.
 
         Args:
@@ -108,7 +107,7 @@ class PriceCache:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
-                SELECT * FROM prices 
+                SELECT * FROM prices
                 WHERE product_key = ? AND source = ? AND timestamp > ?
                 ORDER BY timestamp DESC
                 LIMIT 1
@@ -124,13 +123,13 @@ class PriceCache:
     def set(
         self,
         category: str,
-        brand: Optional[str],
-        model: Optional[str],
-        variant: Optional[str],
+        brand: str | None,
+        model: str | None,
+        variant: str | None,
         price: int,
         source: str,
         comparable_count: int = 1,
-        notes: Optional[str] = None,
+        notes: str | None = None,
     ):
         """Store price data.
 
@@ -143,7 +142,7 @@ class PriceCache:
             source: Price source (retail, comparables, depreciation)
             comparable_count: Number of comparables (for median calculations)
             notes: Optional notes
-        
+
         Note:
             For 'comparables' source, this inserts a new entry each time.
             For other sources, use get() to check if entry exists before adding.
@@ -154,8 +153,8 @@ class PriceCache:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """
-                INSERT INTO prices 
-                (product_key, category, brand, model, variant, price, source, 
+                INSERT INTO prices
+                (product_key, category, brand, model, variant, price, source,
                  comparable_count, timestamp, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -175,7 +174,7 @@ class PriceCache:
             conn.commit()
 
     def find_comparables(
-        self, category: str, brand: Optional[str], model: Optional[str], ttl_days: int = 7
+        self, category: str, brand: str | None, model: str | None, ttl_days: int = 7
     ) -> list[dict]:
         """Find comparable prices for a product.
 
@@ -194,8 +193,8 @@ class PriceCache:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 """
-                SELECT * FROM prices 
-                WHERE category = ? AND brand = ? AND model = ? 
+                SELECT * FROM prices
+                WHERE category = ? AND brand = ? AND model = ?
                   AND source = 'comparables' AND timestamp > ?
                 ORDER BY timestamp DESC
                 """,

@@ -10,7 +10,7 @@ from evaluator.models import (
     PriceSource,
     ProductInfo,
 )
-from evaluator.scoring import Scorer, ScoringConfig
+from evaluator.scoring import Scorer
 
 
 @pytest.fixture
@@ -91,16 +91,16 @@ def test_score_at_fair_price(scorer, base_product, good_condition, reference_pri
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     # Set asking price to fair mid price
     base_product.asking_price = fair_price.mid
-    
+
     signals = CaptionSignals(red_flags=[], positive_signals=["detailed_description"])
-    
+
     score, adjustments, warnings = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals, base_product
     )
-    
+
     # Ratio = 1.0, should score around 7.0
     assert 6.5 <= score <= 7.5
     assert "base_score" in adjustments
@@ -111,16 +111,16 @@ def test_score_below_fair_price(scorer, base_product, good_condition, reference_
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     # Set asking price to 80% of fair price
     base_product.asking_price = int(fair_price.mid * 0.8)
-    
+
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     score, adjustments, warnings = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals, base_product
     )
-    
+
     # Ratio = 0.8, should score high (8-9)
     assert score >= 8.0
 
@@ -130,16 +130,16 @@ def test_score_above_fair_price(scorer, base_product, good_condition, reference_
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     # Set asking price to 150% of fair price
     base_product.asking_price = int(fair_price.mid * 1.5)
-    
+
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     score, adjustments, warnings = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals, base_product
     )
-    
+
     # Ratio = 1.5, should score low (1-3)
     assert score <= 3.0
 
@@ -149,16 +149,16 @@ def test_score_too_cheap_warning(scorer, base_product, good_condition, reference
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     # Set asking price to 40% of fair price (too good to be true)
     base_product.asking_price = int(fair_price.mid * 0.4)
-    
+
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     score, adjustments, warnings = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals, base_product
     )
-    
+
     # Should have a warning about suspicious pricing
     assert len(warnings) > 0
     assert any("suspicious" in w.lower() or "scam" in w.lower() for w in warnings)
@@ -169,15 +169,15 @@ def test_red_flag_penalties(scorer, base_product, good_condition, reference_pric
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     base_product.asking_price = fair_price.mid
-    
+
     # No red flags
     signals_clean = CaptionSignals(red_flags=[], positive_signals=[])
     score_clean, _, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals_clean, base_product
     )
-    
+
     # With red flags
     signals_flagged = CaptionSignals(
         red_flags=["ib_gia", "vague_details"], positive_signals=[]
@@ -185,7 +185,7 @@ def test_red_flag_penalties(scorer, base_product, good_condition, reference_pric
     score_flagged, adjustments, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals_flagged, base_product
     )
-    
+
     # Flagged score should be lower
     assert score_flagged < score_clean
     assert "red_flag_ib_gia" in adjustments
@@ -206,10 +206,10 @@ def test_few_photos_penalty(scorer, base_product, reference_price_comparables):
         ),
         base_product,
     )
-    
+
     base_product.asking_price = fair_price.mid
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     # Many photos
     condition_many = ConditionAssessment(
         condition_score=8.0,
@@ -223,7 +223,7 @@ def test_few_photos_penalty(scorer, base_product, reference_price_comparables):
     score_many, _, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, condition_many, signals, base_product
     )
-    
+
     # Few photos
     condition_few = ConditionAssessment(
         condition_score=8.0,
@@ -237,7 +237,7 @@ def test_few_photos_penalty(scorer, base_product, reference_price_comparables):
     score_few, adjustments, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, condition_few, signals, base_product
     )
-    
+
     assert score_few < score_many
     assert "few_photos" in adjustments
 
@@ -247,10 +247,10 @@ def test_stock_photos_penalty(scorer, base_product, good_condition, reference_pr
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     base_product.asking_price = fair_price.mid
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     # Stock photos
     condition_stock = ConditionAssessment(
         condition_score=8.0,
@@ -264,7 +264,7 @@ def test_stock_photos_penalty(scorer, base_product, good_condition, reference_pr
     score, adjustments, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, condition_stock, signals, base_product
     )
-    
+
     assert "no_real_photos" in adjustments
     assert adjustments["no_real_photos"] < 0
 
@@ -272,11 +272,11 @@ def test_stock_photos_penalty(scorer, base_product, good_condition, reference_pr
 def test_insufficient_data_handling(scorer, base_product, good_condition):
     """Test handling when no reference price available."""
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     score, adjustments, warnings = scorer.calculate_score(
         None, None, good_condition, signals, base_product
     )
-    
+
     # Should return neutral score with warning
     assert score == 5.0
     assert len(warnings) > 0
@@ -295,14 +295,14 @@ def test_missing_price_handling(scorer, good_condition, reference_price_comparab
         currency="VND",
         extraction_confidence=ConfidenceLevel.MEDIUM,
     )
-    
+
     fair_price = scorer.calculate_fair_price(reference_price_comparables, good_condition, product)
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     score, _, warnings = scorer.calculate_score(
         None, fair_price, good_condition, signals, product
     )
-    
+
     assert score == 5.0
     assert len(warnings) > 0
 
@@ -310,7 +310,7 @@ def test_missing_price_handling(scorer, good_condition, reference_price_comparab
 def test_confidence_high(scorer, good_condition, reference_price_comparables):
     """Test high confidence determination."""
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     # High comparables, many photos, no red flags
     ref_price = PriceReference(
         source=PriceSource.COMPARABLES,
@@ -318,7 +318,7 @@ def test_confidence_high(scorer, good_condition, reference_price_comparables):
         comparable_count=12,
         confidence=ConfidenceLevel.HIGH,
     )
-    
+
     confidence = scorer.determine_confidence(ref_price, good_condition, signals)
     assert confidence == ConfidenceLevel.HIGH
 
@@ -335,16 +335,16 @@ def test_confidence_low(scorer):
         image_caption_mismatch=False,
         assessment_confidence=ConfidenceLevel.LOW,
     )
-    
+
     signals = CaptionSignals(red_flags=["ib_gia", "vague_details"], positive_signals=[])
-    
+
     ref_price = PriceReference(
         source=PriceSource.DEPRECIATION,
         value=15000000,
         comparable_count=0,
         confidence=ConfidenceLevel.LOW,
     )
-    
+
     confidence = scorer.determine_confidence(ref_price, condition, signals)
     assert confidence == ConfidenceLevel.LOW
 
@@ -354,17 +354,17 @@ def test_score_clamping(scorer, base_product, good_condition, reference_price_co
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     # Extreme overpricing
     base_product.asking_price = fair_price.mid * 10
     signals = CaptionSignals(
         red_flags=["ib_gia", "deposit_required", "pressure_tactics"], positive_signals=[]
     )
-    
+
     score, _, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals, base_product
     )
-    
+
     # Should be clamped to minimum 1.0
     assert score >= 1.0
     assert score <= 10.0
@@ -375,18 +375,18 @@ def test_explanation_generation(scorer, base_product, good_condition, reference_
     fair_price = scorer.calculate_fair_price(
         reference_price_comparables, good_condition, base_product
     )
-    
+
     base_product.asking_price = fair_price.mid
     signals = CaptionSignals(red_flags=[], positive_signals=[])
-    
+
     score, adjustments, _ = scorer.calculate_score(
         base_product.asking_price, fair_price, good_condition, signals, base_product
     )
-    
+
     explanation = scorer.generate_explanation(
         score, base_product.asking_price, fair_price, good_condition, adjustments
     )
-    
+
     assert len(explanation) > 0
     assert "fair market value" in explanation.lower()
     assert str(good_condition.condition_score) in explanation
